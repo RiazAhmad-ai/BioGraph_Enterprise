@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as $3Dmol from '3dmol/build/3Dmol.js';
 import { Loader } from 'lucide-react';
-import '../styles/components/viewer.css'; // ✅ Import CSS
 
-import ViewerControls from './Viewer/ViewerControls';
+import ViewerControls from './ViewerControls';
+
+// Styles
+import '../../styles/components/viewer.css';
 
 export default function ProteinViewer({ pdbId, onClose }) {
   const viewerRef = useRef(null);
@@ -76,9 +78,9 @@ export default function ProteinViewer({ pdbId, onClose }) {
       <div className="viewer-modal">
         {/* Canvas Area */}
         <div className="viewer-canvas-wrap">
-          {loading && <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', color:'#00f3ff'}}><Loader className="spin-loader" size={32} /></div>}
+          {loading && <div className="viewer-loader"><Loader className="spin-loader" size={32} /></div>}
           {error && <div className="viewer-error">{error}</div>}
-          <div ref={viewerRef} style={{ width: '100%', height: '100%', cursor: 'crosshair' }} />
+          <div ref={viewerRef} className="viewer-canvas" />
         </div>
 
         {/* Controls Side Panel */}

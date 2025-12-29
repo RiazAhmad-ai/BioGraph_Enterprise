@@ -1,0 +1,40 @@
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #050508;
+  border-radius: 8px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(10px);
+}
+
+.toast-message {
+  font-size: 14px;
+}
+
+.toast-close-btn {
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

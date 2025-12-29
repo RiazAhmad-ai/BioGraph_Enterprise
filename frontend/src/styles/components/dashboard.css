@@ -1,0 +1,14 @@
+.dashboard-page-section {
+  position: relative;
+}
+
+.dashboard-panel-right {
+  z-index: 50;
+}
+
+.dashboard-content-area {
+  flex: 1;
+  position: relative;
+  display: flex;
+  height: calc(100% - 60px);
+}

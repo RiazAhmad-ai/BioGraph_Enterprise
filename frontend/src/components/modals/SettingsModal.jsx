@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Sliders } from 'lucide-react';
-import '../styles/components/settings.css'; // ✅ Import CSS
 
 // Modular Components
 import AISettings from './settings/AISettings';
 import VisualSettings from './settings/VisualSettings';
 import DataSettings from './settings/DataSettings';
+
+// Styles
+import '../../styles/components/modals.css';
+import '../../styles/components/settings.css';
 
 export default function SettingsModal({ onClose }) {
   const [settings, setSettings] = useState({
@@ -26,28 +29,28 @@ export default function SettingsModal({ onClose }) {
   };
 
   return (
-    <div className="settings-overlay">
-      <div className="settings-modal">
+    <div className="modal-overlay">
+      <div className="modal-box">
         
         {/* Header */}
-        <div className="settings-header">
+        <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Sliders size={20} color="#00f3ff" />
-            <h3 style={{ margin: 0, color: '#fff', letterSpacing: '1px' }}>SYSTEM CONFIGURATION</h3>
+            <h3 className="modal-title">SYSTEM CONFIGURATION</h3>
           </div>
-          <button onClick={onClose} className="close-btn"><X size={20} /></button>
+          <button onClick={onClose} className="modal-close-btn"><X size={20} /></button>
         </div>
 
         {/* Body */}
-        <div className="settings-body">
+        <div className="modal-body" style={{ padding: '20px 0' }}>
           <AISettings settings={settings} setSettings={setSettings} />
           <VisualSettings settings={settings} setSettings={setSettings} />
           <DataSettings settings={settings} setSettings={setSettings} />
         </div>
 
         {/* Footer */}
-        <div className="settings-footer">
-          <button onClick={handleSave} className="save-btn">
+        <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '15px' }}>
+          <button onClick={handleSave} className="cyber-btn" style={{ padding: '10px 20px', display: 'flex', gap: '8px', alignItems: 'center' }}>
             {saved ? "SETTINGS SAVED!" : <><Save size={18} /> SAVE CHANGES</>}
           </button>
         </div>

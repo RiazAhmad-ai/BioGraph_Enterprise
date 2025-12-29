@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import Toast from './components/Toast';
+import Navbar from './components/navbar/Navbar';
+import Toast from './components/common/Toast';
 import Dashboard from './pages/Dashboard';
 import About from './pages/About';
-import SettingsModal from './components/SettingsModal';
+import SettingsModal from './components/modals/SettingsModal';
 import BackgroundEffects from './components/layout/BackgroundEffects'; // ✅ New Import
 import "./styles/main.css";
 

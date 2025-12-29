@@ -7,11 +7,14 @@ import HeaderStatus from '../components/dashboard/HeaderStatus';
 import HologramDisplay from '../components/dashboard/HologramDisplay';
 import SingleResultDisplay from '../components/dashboard/SingleResultDisplay';
 import BatchResultList from '../components/dashboard/BatchResultList';
-import ResultCard from '../components/ResultCard';
+import ResultCard from '../components/dashboard/ResultCard';
 
 // Modals
-import AnalysisModal from '../components/AnalysisModal';
-import ProteinViewer from '../components/ProteinViewer';
+import AnalysisModal from '../components/modals/AnalysisModal';
+import ProteinViewer from '../components/viewer/ProteinViewer';
+
+// Styles
+import '../styles/components/dashboard.css';
 
 const Dashboard = ({ showToast, historyLoadData }) => {
   const {
@@ -78,7 +81,7 @@ const Dashboard = ({ showToast, historyLoadData }) => {
   };
 
   return (
-    <div className="page-section" style={{ position: 'relative' }}>
+    <div className="page-section dashboard-page-section">
       <div className="main-layout">
         <Sidebar
           activeTab={activeTab} setActiveTab={setActiveTab}
@@ -90,7 +93,7 @@ const Dashboard = ({ showToast, historyLoadData }) => {
           loading={loading} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
         />
 
-        <div className={`glass-panel panel-right ${!isSidebarOpen ? 'expanded' : ''}`} style={{ zIndex: 50 }}>
+        <div className={`glass-panel panel-right ${!isSidebarOpen ? 'expanded' : ''} dashboard-panel-right`}>
           <HeaderStatus 
             loading={loading} 
             aiThreshold={aiThreshold} 
@@ -103,7 +106,7 @@ const Dashboard = ({ showToast, historyLoadData }) => {
             downloading={downloading}
           />
 
-          <div style={{ flex: 1, position: 'relative', display: 'flex', height: 'calc(100% - 60px)' }}>
+          <div className="dashboard-content-area">
             {(loading || (!result && batchResults.length === 0)) ? (
                <HologramDisplay loading={loading} progress={progress} activeTab={activeTab} />
             ) : result ? (

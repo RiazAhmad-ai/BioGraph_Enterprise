@@ -1,0 +1,24 @@
+.result-card-container {
+  border-color: var(--card-border-color, #333);
+  z-index: 60;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  gap: 20px;
+  height: 80px;
+}
+
+.result-card-section-left {
+  flex: 0 0 auto;
+}
+
+.result-card-section-center {
+  flex: 1;
+  max-width: 600px;
+}
+
+.result-card-section-right {
+  flex: 0 0 auto;
+}

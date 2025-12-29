@@ -1,17 +1,16 @@
 import React from 'react';
 
 // ✅ MODULAR IMPORTS
-import BrandLogo from './navbar/BrandLogo';
-import NavTagline from './navbar/NavTagline';
-import NavActions from './navbar/NavActions';
+import BrandLogo from './BrandLogo';
+import NavTagline from './NavTagline';
+import NavActions from './NavActions';
+
+// Styles
+import '../../styles/components/navbar.css';
 
 const Navbar = ({ showAbout, setShowAbout, onHistorySelect, onOpenSettings }) => {
   return (
-    <nav className="glass-nav" style={{
-        padding: '8px 25px', 
-        height: '60px', 
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-    }}>
+    <nav className="glass-nav navbar-container">
       
       {/* 1. Left: Brand Logo */}
       <BrandLogo onClick={() => setShowAbout(false)} />

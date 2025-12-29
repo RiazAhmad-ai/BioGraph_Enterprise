@@ -1,43 +1,40 @@
 import React from 'react';
 import { Home, Info, Settings } from 'lucide-react';
-import HistoryDropdown from '../HistoryDropdown'; // Path adjusted
+import HistoryDropdown from '../common/HistoryDropdown';
 
 export default function NavActions({ showAbout, setShowAbout, onHistorySelect, onOpenSettings }) {
   return (
-    <div className="nav-right" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+    <div className="nav-right">
       
       {/* History Dropdown */}
       <HistoryDropdown onSelectResult={onHistorySelect} />
 
       {/* Divider */}
-      <div style={{ width: '1px', height: '18px', background: 'rgba(255,255,255,0.2)', margin: '0 8px' }}></div>
+      <div className="nav-divider"></div>
 
       {/* Home Button */}
       <div 
-        className={`nav-link ${!showAbout ? 'active-btn' : ''}`} 
+        className={`nav-link ${!showAbout ? 'active-btn' : ''} nav-icon-btn`}
         onClick={() => setShowAbout(false)}
         title="Dashboard"
-        style={{ padding: '8px' }} 
       >
         <Home size={18} />
       </div>
 
       {/* About Button */}
       <div 
-        className={`nav-link ${showAbout ? 'active-btn' : ''}`} 
+        className={`nav-link ${showAbout ? 'active-btn' : ''} nav-icon-btn`}
         onClick={() => setShowAbout(true)}
         title="About"
-        style={{ padding: '8px' }}
       >
         <Info size={18} />
       </div>
 
       {/* Settings Button */}
       <div 
-        className="nav-link"
+        className="nav-link nav-icon-btn"
         onClick={onOpenSettings} 
         title="System Settings"
-        style={{ padding: '8px' }}
       >
         <Settings size={18} />
       </div>

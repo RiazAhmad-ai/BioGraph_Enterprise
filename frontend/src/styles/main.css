@@ -16,5 +16,12 @@
 /* 4. UI Components */
 @import './components/navbar.css';
 @import './components/sidebar.css';
-@import './components/cards.css';
-@import './components/forms.css';
+/* @import './components/cards.css'; Removed: not used anymore */
+/* @import './components/forms.css'; Removed: not used anymore */
+@import './components/result-card.css';
+@import './components/modals.css';
+@import './components/settings.css';
+@import './components/viewer.css';
+@import './components/history.css';
+@import './components/toast.css';
+@import './components/dashboard.css';
