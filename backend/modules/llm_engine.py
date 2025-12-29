@@ -9,7 +9,6 @@ class LLMEngine:
         self.client = None
         
         # 🧠 SUPER INTELLIGENT MODEL LIST (2025 Updated)
-        # Hum Llama 3.3 use kar rahe hain jo reasoning mein sabse best hai.
         self.models = [
             "llama-3.3-70b-versatile",  # ⚡ New Flagship (Best for Science)
             "llama-3.1-70b-versatile",  # Strong Backup
@@ -26,7 +25,6 @@ class LLMEngine:
     def _get_response(self, system_prompt, user_prompt):
         """
         Generic method to call LLM with Fallback Logic.
-        Agar ek model fail ho, to foran dusra try karega.
         """
         if not self.client:
             return "⚠️ AI Brain is offline. API Key Missing."
@@ -39,7 +37,7 @@ class LLMEngine:
                         {"role": "user", "content": user_prompt}
                     ],
                     model=model,
-                    temperature=0.6, # 0.6 rakha hai taake hallucinate na kare, precise rahay
+                    temperature=0.6,
                     max_tokens=1500,
                 )
                 return chat_completion.choices[0].message.content
@@ -52,7 +50,6 @@ class LLMEngine:
     def analyze_drug(self, drug_data, target_id):
         """
         🔬 DEEP SCIENTIFIC ANALYSIS (Chain of Thought)
-        Is method mein hum AI ko 'Steps' follow karne par majboor karenge.
         """
         system_prompt = """
         You are BioGraph AI, a world-class Lead Discovery Scientist.
@@ -71,7 +68,6 @@ class LLMEngine:
         }
         """
         
-        # Formatting Pharmacology Text
         sites_text = "No specific pharmacophores detected"
         if drug_data.get('active_sites'):
             sites_text = ", ".join([f"{s['type']} ({len(s['atoms'])} atoms)" for s in drug_data.get('active_sites')])
@@ -103,7 +99,6 @@ class LLMEngine:
         response = self._get_response(system_prompt, user_prompt)
         
         try:
-            # Cleaning JSON Markdown wrapper
             if "```json" in response:
                 response = response.split("```json")[1].split("```")[0]
             elif "```" in response:
@@ -120,11 +115,8 @@ class LLMEngine:
 
     def chat_with_drug(self, user_query, context_data):
         """
-        🤖 SUPER INTELLIGENT COMPANION MODE
-        Yeh mode 'Context-Aware' hai. Yeh Roman Urdu, English, aur Code sab samajhta hai.
+        🤖 SUPER INTELLIGENT COMPANION MODE (Context-Aware)
         """
-        
-        # 1. Persona & Tone Setup
         system_prompt = """
         You are 'BioGraph AI', a sentient, highly intelligent, and empathetic research companion.
         
@@ -143,7 +135,6 @@ class LLMEngine:
         - Keep answers concise (max 3-4 sentences) unless asked for details.
         """
 
-        # 2. Context Injection
         drug_context = f"""
         [CURRENT DRUG FILE]
         Name: {context_data.get('name', 'Unknown')}
@@ -152,7 +143,6 @@ class LLMEngine:
         Active Sites: {context_data.get('active_sites', 'N/A')}
         """
 
-        # 3. Final Input
         full_user_prompt = f"""
         {drug_context}
         
@@ -162,3 +152,51 @@ class LLMEngine:
         """
 
         return self._get_response(system_prompt, full_user_prompt)
+
+    # ✅ NEW: GENERATIVE OPTIMIZATION (INVENTOR MODE)
+    def optimize_drug(self, drug_data, target_id):
+        """
+        🧪 Generative Chemistry: AI suggest karega ke Drug ko kaise modify karein taake wo BEHTAR ho jaye.
+        """
+        system_prompt = """
+        You are an Expert Medicinal Chemist specializing in Lead Optimization.
+        
+        YOUR TASK:
+        The user has a drug candidate that is either TOXIC or has LOW BINDING.
+        You must suggest a CHEMICAL MODIFICATION (add/remove atoms) to improve it.
+        
+        OUTPUT FORMAT (STRICT JSON):
+        {
+            "original_flaw": "e.g., High LogP causing toxicity, or weak H-bonds.",
+            "suggestion": "e.g., Add a Hydroxyl (-OH) group to the phenyl ring to improve solubility.",
+            "optimized_smiles": "THE_NEW_VALID_SMILES_STRING",
+            "reasoning": "Scientific explanation of why this change fixes the issue."
+        }
+        """
+        
+        user_prompt = f"""
+        🚨 DRUG NEEDS OPTIMIZATION:
+        Name: {drug_data.get('name')}
+        Current SMILES: {drug_data.get('smiles')}
+        Current Score: {drug_data.get('score')} (Target > 7.5)
+        ADMET Profile: {json.dumps(drug_data.get('admet', {}))}
+        
+        Optimize this molecule to be Safer and more Potent against Target {target_id}.
+        Provide a VALID SMILES string for the improved version.
+        """
+        
+        response = self._get_response(system_prompt, user_prompt)
+        
+        try:
+            if "```json" in response:
+                response = response.split("```json")[1].split("```")[0]
+            elif "```" in response:
+                response = response.split("```")[1].split("```")[0]
+            return json.loads(response)
+        except:
+            return {
+                "original_flaw": "Complex Analysis Required",
+                "suggestion": "Manual structural refinement recommended.",
+                "optimized_smiles": drug_data.get('smiles'),
+                "reasoning": "AI could not generate a valid structure format."
+            }

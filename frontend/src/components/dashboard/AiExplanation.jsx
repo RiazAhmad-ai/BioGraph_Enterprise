@@ -1,24 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import { BrainCircuit, Sparkles } from 'lucide-react';
+import React from 'react';
+import { BrainCircuit, Sparkles, FileText, Shield, Activity, Target } from 'lucide-react';
+
+// ✅ FIX: Helper Component Moved OUTSIDE
+const Section = ({ icon: Icon, title, content, color }) => (
+  <div style={{ marginBottom: '15px', animation: 'fadeIn 0.5s ease-in' }}>
+    <div style={{ 
+      display: 'flex', alignItems: 'center', gap: '8px', 
+      marginBottom: '5px', color: color, fontSize: '11px', 
+      fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' 
+    }}>
+      <Icon size={12} /> {title}
+    </div>
+    <div style={{ 
+      fontSize: '12px', color: '#e0e0e0', lineHeight: '1.5', 
+      background: 'rgba(0,0,0,0.2)', padding: '10px', 
+      borderRadius: '8px', borderLeft: `2px solid ${color}` 
+    }}>
+      {content || "N/A"}
+    </div>
+  </div>
+);
 
 export default function AiExplanation({ result }) {
-  const [text, setText] = useState("");
-  const fullText = result?.ai_explanation || "Waiting for Llama 3 analysis..."; // ✅ Name Fixed
+  // ✅ Direct Derivation (No State, No Effect)
+  const explanation = result?.ai_explanation;
 
-  useEffect(() => {
-    setText("");
-    if(!fullText) return;
+  if (!explanation) return (
+    <div style={{ padding: '20px', color: '#666', fontSize: '12px', textAlign: 'center' }}>
+      Waiting for AI Analysis...
+    </div>
+  );
 
-    let i = 0;
-    const interval = setInterval(() => {
-      setText(fullText.substring(0, i));
-      i++;
-      if (i > fullText.length) clearInterval(interval);
-    }, 5); 
-    return () => clearInterval(interval);
-  }, [fullText]);
-
-  if (!result?.ai_explanation) return null;
+  // Logic: Handle String vs Object
+  const displayedData = typeof explanation === 'object' 
+    ? explanation 
+    : { summary: explanation };
 
   return (
     <div style={{ 
@@ -28,7 +44,7 @@ export default function AiExplanation({ result }) {
       flexDirection: 'column',
       padding: '15px',
       background: 'linear-gradient(135deg, rgba(188, 19, 254, 0.05), rgba(0, 243, 255, 0.05))',
-      borderLeft: '4px solid #00f3ff', // ✅ Cyan Color for Llama
+      borderLeft: '4px solid #00f3ff', 
       borderRadius: '12px',
       boxShadow: '0 4px 20px rgba(0, 243, 255, 0.1)',
       boxSizing: 'border-box',
@@ -39,44 +55,53 @@ export default function AiExplanation({ result }) {
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        gap: '10px', 
-        marginBottom: '10px',
+        justifyContent: 'space-between',
+        marginBottom: '15px',
         borderBottom: '1px solid rgba(0, 243, 255, 0.2)',
-        paddingBottom: '8px',
+        paddingBottom: '10px',
         flexShrink: 0 
       }}>
-        <BrainCircuit size={20} color="#00f3ff" />
-        <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff', letterSpacing: '1px' }}>
-          AI ANALYST {/* ✅ Name Fixed */}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <BrainCircuit size={20} color="#00f3ff" />
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff', letterSpacing: '1px' }}>
+            BIOGRAPH INTELLIGENCE
+            </span>
+        </div>
         <Sparkles size={14} color="#bc13fe" className="animate-pulse" />
       </div>
 
+      {/* Content Area (Scrollable) */}
       <div className="custom-scroll" style={{ 
         flex: 1, 
         width: '100%',           
         overflowY: 'auto',       
-        overflowX: 'hidden',     
         paddingRight: '5px'
       }}>
-        <div style={{ 
-          color: '#e0e0e0', 
-          fontSize: '13px', 
-          lineHeight: '1.6', 
-          fontFamily: 'sans-serif',
-          width: '100%',         
-          whiteSpace: 'pre-wrap',   
-          wordBreak: 'break-word',  
-          overflowWrap: 'anywhere', 
-          boxSizing: 'border-box'   
-        }}>
-          {text}
-          <span style={{color: '#00f3ff', animation: 'blink 1s infinite', marginLeft:'2px'}}>|</span>
-        </div>
+        
+        {/* 1. Executive Summary */}
+        {displayedData.summary && (
+          <Section icon={FileText} title="Executive Summary" content={displayedData.summary} color="#00f3ff" />
+        )}
+
+        {/* 2. Mechanism */}
+        {displayedData.mechanism && (
+          <Section icon={Activity} title="Mechanism of Action" content={displayedData.mechanism} color="#bc13fe" />
+        )}
+
+        {/* 3. Safety Analysis */}
+        {displayedData.safety_analysis && (
+          <Section icon={Shield} title="Safety Profile (ADMET)" content={displayedData.safety_analysis} color="#ff0055" />
+        )}
+
+        {/* 4. Conclusion / Clinical Potential */}
+        {(displayedData.conclusion || displayedData.clinical_potential) && (
+          <Section icon={Target} title="Final Verdict" content={displayedData.conclusion || displayedData.clinical_potential} color="#00ff88" />
+        )}
+
       </div>
       
       <style>{`
-        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.3); borderRadius: 4px; }
