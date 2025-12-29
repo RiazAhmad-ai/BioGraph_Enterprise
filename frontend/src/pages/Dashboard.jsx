@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState } from 'react'; 
 import { useDashboardLogic } from '../hooks/useDashboardLogic';
 
 // Components
@@ -28,21 +28,17 @@ const Dashboard = ({ showToast, historyLoadData }) => {
     handleFileSelect,
     handleScan,
     handleDrugClick,
-    cardRef
+    cardRef,
+    chatHistory, setChatHistory // ✅ From Hook
   } = useDashboardLogic(showToast, historyLoadData);
 
-  // Local State
+  // Local UI State
   const [showModal, setShowModal] = useState(false);
   const [show3D, setShow3D] = useState(false);
   const [downloading, setDownloading] = useState(false);
   
-  // ✅ NEW: Chat Response State (Jawab yahan store hoga)
-  const [chatResponse, setChatResponse] = useState(null);
-
-  // Jab bhi naya result aye, purana chat clear kar dein
-  useEffect(() => {
-    setChatResponse(null);
-  }, [result]);
+  // ❌ REMOVED: Local chatHistory useState
+  // ❌ REMOVED: useEffect that caused the warning
 
   // Download Logic
   const downloadReport = async () => {
@@ -111,8 +107,7 @@ const Dashboard = ({ showToast, historyLoadData }) => {
             {(loading || (!result && batchResults.length === 0)) ? (
                <HologramDisplay loading={loading} progress={progress} activeTab={activeTab} />
             ) : result ? (
-               // ✅ PASS: Chat Response ko display ke liye bhej rahe hain
-               <SingleResultDisplay result={result} chatResponse={chatResponse} />
+               <SingleResultDisplay result={result} chatHistory={chatHistory} />
             ) : (
                <BatchResultList results={batchResults} aiThreshold={aiThreshold} onItemClick={handleDrugClick} />
             )}
@@ -120,8 +115,14 @@ const Dashboard = ({ showToast, historyLoadData }) => {
         </div>
       </div>
       
-      {/* ✅ PASS: setChatResponse ko card mein bhej rahe hain taake wo update kar sake */}
-      {result && <ResultCard result={result} cardRef={cardRef} isSidebarOpen={isSidebarOpen} setChatResponse={setChatResponse} />}
+      {result && (
+        <ResultCard 
+          result={result} 
+          cardRef={cardRef} 
+          isSidebarOpen={isSidebarOpen} 
+          setChatHistory={setChatHistory} 
+        />
+      )}
 
       {show3D && <ProteinViewer pdbId={target || "6LU7"} onClose={() => setShow3D(false)} />}
       {showModal && <AnalysisModal result={result} onClose={() => setShowModal(false)} />}

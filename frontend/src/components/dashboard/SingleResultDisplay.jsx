@@ -1,11 +1,18 @@
-import React from 'react';
-import { MessageSquare, Sparkles, BrainCircuit, Activity, Box } from 'lucide-react'; // ❌ Box hata dein
+import React, { useEffect, useRef } from 'react';
+import { MessageSquare, Sparkles, User, Bot, Activity, Box } from 'lucide-react';
 import { apiClient } from '../../api/client';
 import AdmetChart from './AdmetChart';
 import AiExplanation from './AiExplanation';
 
-export default function SingleResultDisplay({ result, chatResponse }) {
+export default function SingleResultDisplay({ result, chatHistory }) { // ✅ Receive chatHistory
+  const chatEndRef = useRef(null);
+  
   if (!result) return null;
+
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatHistory]);
 
   // 1. GLOBAL STYLE CONFIGURATION
   const styles = {
@@ -93,40 +100,57 @@ export default function SingleResultDisplay({ result, chatResponse }) {
                  <MessageSquare size={14} /> AI ASSISTANT
              </div>
 
-             <div style={{ flex: 1, padding: '50px 25px 25px 25px', overflowY: 'auto', fontSize: '14px', lineHeight: '1.6', color: '#e0e0e0' }}>
-                {chatResponse ? (
-                    <div className="fade-in-text" style={{ whiteSpace: 'pre-wrap' }}>
-                        {chatResponse}
-                    </div>
+             <div style={{ flex: 1, padding: '50px 20px 20px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                
+                {chatHistory && chatHistory.length > 0 ? (
+                    chatHistory.map((msg, index) => (
+                        <div key={index} style={{
+                            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                            maxWidth: '85%',
+                            background: msg.role === 'user' ? 'rgba(0, 243, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                            border: msg.role === 'user' ? '1px solid rgba(0, 243, 255, 0.3)' : '1px solid #333',
+                            borderRadius: '12px',
+                            padding: '12px',
+                            color: '#e0e0e0',
+                            fontSize: '13px',
+                            lineHeight: '1.5'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', fontSize: '10px', color: msg.role === 'user' ? '#00f3ff' : '#888', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                {msg.role === 'user' ? <User size={10}/> : <Bot size={10}/>} 
+                                {msg.role === 'user' ? 'YOU' : 'AI DOCTOR'}
+                            </div>
+                            {msg.content}
+                        </div>
+                    ))
                 ) : (
                     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.4 }}>
                         <Sparkles size={40} style={{ marginBottom: '15px', color: '#00f3ff' }} />
-                        <div style={{ textAlign: 'center' }}>
+                        <div style={{ textAlign: 'center', fontSize: '14px' }}>
                            ASK AI DOCTOR<br/>
-                           <span style={{ fontSize: '12px' }}>Use the central input bar to chat.</span>
+                           <span style={{ fontSize: '12px' }}>Use the bottom bar to chat.</span>
                         </div>
                     </div>
                 )}
+                <div ref={chatEndRef} />
              </div>
           </div>
 
           {/* --- PANEL 4: ADMET RADAR CHART (Bottom Right) --- */}
           <div style={styles.panel}>
-             {/* Label Change Kiya */}
              <div style={styles.label()}>
                  <Activity size={14} /> ADMET RADAR CHART
              </div>
 
-             {/* ✅ Sirf Radar Chart yahan show hoga */}
              <div style={{ 
                flex: 1, 
                display: 'flex', 
                alignItems: 'center', 
                justifyContent: 'center', 
                padding: '20px',
-               overflow: 'hidden' // Taake chart bahar na nikle
+               overflow: 'hidden'
              }}>
                 <div style={{ width: '100%', height: '100%', display:'flex', justifyContent:'center', alignItems:'center' }}>
+                   {/* ✅ New Authentic Radar Chart */}
                    <AdmetChart admet={result.admet} color={result.color} />
                 </div>
              </div>

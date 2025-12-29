@@ -14,6 +14,9 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedFile, setSelectedFile] = useState(null);
   const [aiThreshold, setAiThreshold] = useState(7.0);
+  
+  // ✅ NEW: Chat History State moved here
+  const [chatHistory, setChatHistory] = useState([]);
 
   const fileInputRef = useRef(null);
 
@@ -34,6 +37,7 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
     if (historyLoadData) {
       setResult(historyLoadData);
       setBatchResults([]);
+      setChatHistory([]); // ✅ Clear chat on history load
       showToast(`History Loaded: ${historyLoadData.name}`, 'success');
     }
   }, [historyLoadData, showToast]);
@@ -54,7 +58,11 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
 
   // --- 4. HANDLERS ---
   const handleTabChange = (tabName) => {
-    setActiveTab(tabName); setResult(null); setBatchResults([]); setSelectedId(null);
+    setActiveTab(tabName); 
+    setResult(null); 
+    setBatchResults([]); 
+    setSelectedId(null);
+    setChatHistory([]); // ✅ Clear chat on tab change
     if (!isSidebarOpen) setIsSidebarOpen(true);
   };
 
@@ -64,12 +72,13 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
 
   const handleDrugClick = (drug) => {
     setSelectedId(drug.name);
-    const isActive = drug.score >= aiThreshold;
+    setChatHistory([]); // ✅ Clear chat immediately when new drug is clicked
     
+    const isActive = drug.score >= aiThreshold;
     const newResult = {
       score: drug.score,
       status: isActive ? 'ACTIVE' : 'INACTIVE',
-      confidence: drug.confidence || "N/A", // ✅ Real Confidence
+      confidence: drug.confidence || "N/A",
       color: isActive ? '#00f3ff' : '#ff0055',
       name: drug.name,
       smiles: drug.smiles || smiles,
@@ -89,7 +98,13 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
     if (activeTab === 'manual' && !safeSmiles) return showToast("Enter SMILES!", "error");
     if (activeTab === 'upload' && !selectedFile) return showToast("Select a file!", "error");
 
-    setLoading(true); setProgress(0); setResult(null); setBatchResults([]); setSelectedId(null);
+    setLoading(true); 
+    setProgress(0); 
+    setResult(null); 
+    setBatchResults([]); 
+    setSelectedId(null);
+    setChatHistory([]); // ✅ Clear chat on new scan start
+    
     let progressInterval = null;
 
     try {
@@ -117,7 +132,6 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
         setBatchResults(data.results);
         showToast(`Found ${data.results.length} candidates`, "success");
       } else {
-        // ✅ Single Result Logic
         const scoreValue = data.score !== undefined ? data.score : 0;
         const isActive = scoreValue >= aiThreshold;
         
@@ -142,7 +156,7 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
     }
   };
 
-  // Return everything needed by UI
+  // Return everything including Chat State
   return {
     activeTab, setActiveTab: handleTabChange,
     target, setTarget,
@@ -157,6 +171,7 @@ export const useDashboardLogic = (showToast, historyLoadData) => {
     fileInputRef,
     handleFileSelect,
     handleScan,
-    handleDrugClick
+    handleDrugClick,
+    chatHistory, setChatHistory // ✅ Exporting Chat State
   };
 };

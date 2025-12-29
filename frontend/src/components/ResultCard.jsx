@@ -2,8 +2,8 @@ import React from 'react';
 import { BindingScore, ConfidenceScore } from './result-card/ScoreSection';
 import DrugChat from './dashboard/DrugChat';
 
-// ✅ Accept setChatResponse prop
-export default function ResultCard({ result, cardRef, isSidebarOpen, setChatResponse }) {
+// ✅ Accept setChatHistory prop
+export default function ResultCard({ result, cardRef, isSidebarOpen, setChatHistory }) {
   if (!result) return null;
 
   const containerClass = `result-card ${result.status === 'ACTIVE' ? 'active' : 'inactive'} ${!isSidebarOpen ? 'sidebar-closed' : ''}`;
@@ -30,9 +30,9 @@ export default function ResultCard({ result, cardRef, isSidebarOpen, setChatResp
         <BindingScore result={result} />
       </div>
 
-      {/* 2. CENTER: Chat Bar (Pass onResponse) */}
+      {/* 2. CENTER: Chat Bar (Pass setChatHistory) */}
       <div style={{ flex: 1, maxWidth: '600px' }}> 
-        <DrugChat result={result} compact={true} onResponse={setChatResponse} />
+        <DrugChat result={result} compact={true} setChatHistory={setChatHistory} />
       </div>
 
       {/* 3. RIGHT: Confidence Score */}
