@@ -1,114 +1,156 @@
 import os
 import json
-from groq import Groq
+from google import genai
+from google.genai import types
 
 class LLMEngine:
     def __init__(self):
         # 🔑 API Key Environment se load hogi
-        self.api_key = os.getenv("GROQ_API_KEY")
+        self.api_key = os.getenv("GEMINI_API_KEY")
         self.client = None
         
-        # Models List
-        self.models = [
-            "llama-3.3-70b-versatile",
-            "llama-3.1-70b-versatile",
-            "llama-3.1-8b-instant"
-        ]
+        # 🚀 PRIMARY MODEL: Sabse latest aur tez wala
+        self.active_model_id = "gemini-2.5-flash" 
         
         if self.api_key:
             try:
-                self.client = Groq(api_key=self.api_key)
-                print(f"✅ BioGraph Super-Intelligence Activated (Groq)")
+                # ✅ NEW SDK INITIALIZATION
+                self.client = genai.Client(api_key=self.api_key)
+                print(f"✅ BioGraph Intelligence Activated (Google Gen AI SDK)")
             except Exception as e:
-                print(f"⚠️ LLM Init Error: {e}")
+                print(f"⚠️ GenAI Init Error: {e}")
         else:
-            print("⚠️ WARNING: GROQ_API_KEY not found. AI features will be disabled.")
+            print("⚠️ WARNING: GEMINI_API_KEY not found.")
 
-    def _get_response(self, system_prompt, user_prompt):
+    def _get_response(self, prompt):
+        """
+        Ye function automatically best working model dhoond lega.
+        """
         if not self.client:
             return "⚠️ AI Brain is offline. API Key Missing."
 
-        for model in self.models:
-            try:
-                chat_completion = self.client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    model=model,
-                    temperature=0.6,
-                    max_tokens=1500,
-                )
-                return chat_completion.choices[0].message.content
-            except Exception as e:
-                print(f"⚠️ Model {model} failed, switching brain... Error: {e}")
-                continue
+        # 📋 List of Models to Try (Priority Order based on your list)
+        candidate_models = [
+            self.active_model_id,       # gemini-2.5-flash (Best)
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",           # More Intelligent Backup
+            "gemini-2.0-flash",         # Stable Backup
+            "gemini-2.0-flash-exp",     # Experimental Backup
+            "gemini-flash-latest"       # Generic Alias
+        ]
         
-        return "⚠️ System Overload: All AI models are currently busy."
+        # Duplicates remove karein
+        seen = set()
+        unique_candidates = [x for x in candidate_models if not (x in seen or seen.add(x))]
+
+        for model in unique_candidates:
+            try:
+                # 🚀 Attempt Generation
+                response = self.client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.7
+                    )
+                )
+                
+                # Agar success ho gaya, to is model ko future ke liye save karlo
+                if model != self.active_model_id:
+                    print(f"🔄 Switched AI Model to: {model}")
+                    self.active_model_id = model
+                
+                return response.text
+
+            except Exception as e:
+                # Agar error aye to next model try karo
+                error_msg = str(e)
+                if "404" in error_msg or "not found" in error_msg.lower():
+                    continue
+                else:
+                    # Connection Errors (Ignore and retry next)
+                    continue
+
+        return "⚠️ System Overload: Could not connect to any AI model. Please check Internet or API Key."
 
     def analyze_drug(self, drug_data, target_id):
-        system_prompt = """
-        You are BioGraph AI, a world-class Lead Discovery Scientist.
-        STRICT OUTPUT FORMAT (JSON ONLY):
-        {
+        """
+        🔬 DEEP SCIENTIFIC ANALYSIS
+        """
+        prompt = f"""
+        You are BioGraph AI, an expert Lead Discovery Scientist.
+        Perform a critical analysis of this drug candidate.
+        
+        INPUT DATA:
+        - Name: {drug_data.get('name')}
+        - SMILES: {drug_data.get('smiles')}
+        - Target Protein: {target_id}
+        - Binding Score: {drug_data.get('score')}
+        - ADMET Profile: {json.dumps(drug_data.get('admet', {}))}
+        
+        TASK:
+        Return a valid JSON object with exactly these keys:
+        {{
             "summary": "2-line executive summary.",
-            "mechanism": "How does it actually bind?",
-            "safety_analysis": "Critical review of ADMET.",
+            "mechanism": "How does it actually bind? Discuss interactions.",
+            "safety_analysis": "Critical review of ADMET risks.",
             "clinical_potential": "High/Medium/Low",
             "conclusion": "Final verdict"
-        }
+        }}
+        
+        IMPORTANT: Return ONLY the JSON. No markdown formatting.
         """
         
-        sites_text = "No specific pharmacophores detected"
-        if drug_data.get('active_sites'):
-            sites_text = ", ".join([f"{s['type']} ({len(s['atoms'])} atoms)" for s in drug_data.get('active_sites')])
-
-        user_prompt = f"""
-        🔬 ANALYZE THIS CANDIDATE:
-        Name: {drug_data.get('name')}
-        SMILES: {drug_data.get('smiles')}
-        Target: {target_id}
-        Binding Score: {drug_data.get('score')}
-        Active Sites: {sites_text}
-        ADMET: {json.dumps(drug_data.get('admet', {}))}
-        """
-        
-        response = self._get_response(system_prompt, user_prompt)
+        response_text = self._get_response(prompt)
         
         try:
-            if "```json" in response:
-                response = response.split("```json")[1].split("```")[0]
-            elif "```" in response:
-                response = response.split("```")[1].split("```")[0]
-            return json.loads(response)
+            # Clean JSON (Markdown hatana)
+            cleaned_text = response_text.replace("```json", "").replace("```", "").strip()
+            return json.loads(cleaned_text)
         except:
             return {
                 "summary": "AI Analysis generated but format was unstructured.",
-                "mechanism": response[:500] + "...",
-                "safety_analysis": "Check Radar Chart.",
-                "clinical_potential": "Manual Review",
-                "conclusion": "Parse Error."
+                "mechanism": response_text[:500],
+                "safety_analysis": "Please check the Radar Chart for safety details.",
+                "clinical_potential": "Manual Review Required",
+                "conclusion": "Parsing Error"
             }
 
     def chat_with_drug(self, user_query, context_data):
-        system_prompt = "You are 'BioGraph AI'. Reply in Roman Urdu if asked in it. Be scientific but empathetic."
-        drug_context = f"Drug: {context_data.get('name')}, Score: {context_data.get('score')}, ADMET: {context_data.get('admet')}"
-        return self._get_response(system_prompt, f"{drug_context}\nUSER: {user_query}")
+        """
+        🤖 Chat Mode
+        """
+        prompt = f"""
+        You are 'BioGraph AI', an intelligent research companion.
+        - If the user uses Roman Urdu, reply in Roman Urdu.
+        - Be professional but conversational.
+        
+        DRUG CONTEXT:
+        Name: {context_data.get('name')}
+        Score: {context_data.get('score')}
+        ADMET: {context_data.get('admet')}
+        
+        USER QUESTION: "{user_query}"
+        """
+        return self._get_response(prompt)
 
     def optimize_drug(self, drug_data, target_id):
-        system_prompt = """
-        Suggest chemical modification.
-        OUTPUT JSON: {"original_flaw": "", "suggestion": "", "optimized_smiles": "", "reasoning": ""}
-        """
-        user_prompt = f"Optimize {drug_data.get('name')} (SMILES: {drug_data.get('smiles')}) for Target {target_id}."
+        prompt = f"""
+        You are a Medicinal Chemist. Suggest a structural modification to improve the drug.
         
-        response = self._get_response(system_prompt, user_prompt)
+        DRUG: {drug_data.get('name')} (SMILES: {drug_data.get('smiles')})
+        TARGET: {target_id}
+        
+        Return JSON with keys: 
+        {{ "original_flaw": "...", "suggestion": "...", "optimized_smiles": "...", "reasoning": "..." }}
+        Return ONLY JSON.
+        """
+        
+        response_text = self._get_response(prompt)
         try:
-            if "```json" in response: response = response.split("```json")[1].split("```")[0]
-            elif "```" in response: response = response.split("```")[1].split("```")[0]
-            return json.loads(response)
+            cleaned_text = response_text.replace("```json", "").replace("```", "").strip()
+            return json.loads(cleaned_text)
         except:
-            return {"original_flaw": "N/A", "suggestion": "Manual refinement", "optimized_smiles": drug_data.get('smiles'), "reasoning": "AI Format Error"}
+            return {"original_flaw": "Error", "suggestion": "Manual", "optimized_smiles": "", "reasoning": "Parse Error"}
 
-# ✅ Instance Creation (Ye zaroori hai taake import error na aye)
+# ✅ Instance Creation
 llm_bot = LLMEngine()
