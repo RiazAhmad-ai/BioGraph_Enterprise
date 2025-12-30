@@ -2,7 +2,7 @@
 ## The Universal Drug Repurposing Engine v2.0
 
 <p align="center">
-  <img src="C:/Users/MR.Riaz/.gemini/antigravity/brain/dc1f02f1-ce47-4b73-9466-08c8a8fb09b4/biograph_logo_science_1767104024581.png" width="400" alt="BioGraph Enterprise Logo">
+  <img src="logo.png" width="600" alt="BioGraph Enterprise Logo">
 </p>
 
 **Advancing Medicine through Graph Intelligence**
